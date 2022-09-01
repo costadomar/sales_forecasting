@@ -275,8 +275,6 @@ x_train, x_test, y_train, y_test = train_test_split(x,y, '2013-01-31','2015-07-3
 ![image](https://user-images.githubusercontent.com/90925360/188013043-75dc193a-0c4e-4f0b-9168-24f6e489d59d.png)
 
 ## 7. Escalonando as variaveis
- 
- # Normalização das variáveis
   
 ```
 scaler = MinMaxScaler()
@@ -290,4 +288,59 @@ x_train = pd.DataFrame(X_train_scaled,columns = x_train.columns, index =x_train.
 x_test = pd.DataFrame(X_test_scaled,columns = x_train.columns, index = x_test.index)
 x = pd.DataFrame(X_escalo,columns = x.columns, index = x.index)
 ```
-  
+
+## 8. Modelando a Série Temporal
+
+Para a modelagem da série temporal, foi escohido dois tipos de modelos o ARIMA e a sua derivação o SARIMAX. São modelos estatísticos muito utlizados para esse tipo de abordagem.
+
+### 8.1 Modelando com o Auto-arima
+
+Para analisarmos mais profundamente os dados que nos foi fornecido, utilizamos o AUTO ARIMA. Sendo assim, escolhemos iniciar os parâmetros p e q (autorregressivo e média móvel, respectivamente) em 0 e o m (periodicidade de sazonalidade) em 12 devido a nossa base ser em meses. Com isso, ele irá testar várias configurações de modelos ARIMA e trazer o melhor que minimiza o AIC.
+
+![image](https://user-images.githubusercontent.com/90925360/188015504-31c08a13-bab2-4e55-82ee-587e0a6a6094.png)
+
+![image](https://user-images.githubusercontent.com/90925360/188015605-892d9a0a-55a8-4210-9b29-0516c64d99e9.png)
+
+Esses são os valores dos parâmetros que minimizam melhor o AIC.
+
+Com isso, vamos treinar o modelo a partir desses parametros, fazendo uma previsão de 5 meses a frente da nossa base de treino.
+
+![image](https://user-images.githubusercontent.com/90925360/188016237-4258ccf8-643d-476b-b464-34d1f153bb61.png)
+
+![image](https://user-images.githubusercontent.com/90925360/188016301-0a74dac2-ea36-480b-a4fd-e88978ce1c01.png)
+
+Podemos vê a previsão do modelo (verde) em relação aos dados de testes. A predição até consegue fazer a tendência nos 2 primeiros eses do dados de teste, mas logo em seguida ela começa a subir.
+Vamos analisar os residuos gerados pelo modelo.
+
+```
+  stepwise.plot_diagnostics(figsize=(16, 8))
+  plt.show()
+```
+![image](https://user-images.githubusercontent.com/90925360/188018189-e4185ac8-6cab-447f-a96d-c2312020a213.png)
+
+Na figura acima, temos o resíduo, histograma dos resíduos o gráfico QQ e o correlograma.
+
+O comportamento dos resíduos apresentam uma grande flutuação em torno do valor zero. Já o histograma não chegou a apresentar uma distribuição normal. No gráfico, do Q Q plot temos uma grande dispersão dos valões no começo da linha vermelha e no final dela, o que evidencia uma não normalidade dos dados, e por fim, o correlograma que não traz muitas informações.
+
+Agora vamos analisar as métricas do nosso modelo. Para fazer a avaliação do modelo esta sendo utilizado 2 métricas.
+
+As métricas para a avaliação do modelo é o RMSE, MAE da biblioteca SKLEARN, sendo muito usadas em séries temporais A primeira métrica é a Raiz Quadrada do Erro Quadrático Médio, sendo a diferença do valor real e o valor previsto, é usada para comparação entre modelos, onde o melhor modelo apresenta o valor mais próximo de zero, sendo mais sensível a erros maiores O MAE, erro médio absoluto, sendo a média dos erros absolutos da série, na qual é a diferença do real com o previsto.
+
+![image](https://user-images.githubusercontent.com/90925360/188019943-dbe8d18d-ef0a-433f-84e1-7e559cc6fd60.png)
+
+## 8.2 Modelando com o Sarimax
+
+Para seguir a modelagem com o SARIMAX, utilizaremos os coeficientes dados pelo AUTO-ARIMA, order (0,0,1) e seasonal_order (0,0,1,12). Primeiramente vamos fazer a modelagem só com a variavel target, sem as variaveis exogenas no modelo para analizarmos o comportamento do modelo.
+
+```
+  mod = SARIMAX(y_train, order=(0,0,1), seasonal_order=(0, 0, 1, 12))
+  fit_res = mod.fit(disp=False, maxiter=250)
+  print(fit_res.summary())
+
+  predito = fit_res.predict(typ='levels')
+```
+![image](https://user-images.githubusercontent.com/90925360/188023000-22ea990c-d400-46f7-957b-e191ee1c8ab3.png)
+
+Quanto mais próximo o grau de conformidade e previsão as linhas devem ficar alinhadas sem recuos. Como podemos ver acima, o modelo apresentado s conseguiram capturar
+o padrão das bases de dados
+
