@@ -161,3 +161,133 @@ Vamos fazer uma análise de correlação da variavel target em função do tempo
 
  A série não apresenta uma correlação alta com o tempo.
 
+# 4. Análise Da Série Temporal 'item_cnt_day'
+  
+A partir daqui vamos analisar o comportamento da nossa variavel target, mediante conceitos de séries temporais. Como queremos prever o próximo mês de venda, vamos trabalahr com o dataset organizado mensalmente.
+  
+
+## 4.1 Decomposição dos dados
+
+Vamos decompor os dados em tendencia, sazonalidade e residuos, porque toda série temporal pode ser decomposta nessas três partes.
+  
+```
+df_mensal = df_shop31_Item_20949.copy() #fazendo uma cópia do dataset
+df_mensal.set_index('date', inplace = True) #transformando a coluna data em index
+df_mensal = df_mensal.resample(rule = 'M').last() #reordenando o dataset por mês
+```
+![image](https://user-images.githubusercontent.com/90925360/188002655-3134e05e-9444-4b89-bf3c-76a599d69de7.png)
+
+ A série não apresentou uma correlaço muito boa com o tempo.
+  
+ # 4. Análise Da Série Temporal 'item_cnt_day'
+  
+ A partir daqui vamos analisar o comportamento da nossa variavel target, mediante conceitos de séries temporais.
+  
+## 4.1 Decomposição dos dados
+ As séries temporais apresentam algumas propriedades importantes para serem analisas:
+  * Tendência: É a análise se a série esta crescendo, dimuindo ou estável com o decorrer do tempo.
+  * Sazonalidade: Seria um feômeno periodo que se repetem no mesmo periodo no tempo, exemplo, vendas de chocolate em toda pascoa no mês de março pr exemplo.
+  
+![image](https://user-images.githubusercontent.com/90925360/188003933-77bc6dee-bf05-456a-8315-6602ae682feb.png)
+
+Claramente a série apresenta uma tendência de baixa a partir de maio de 2014. Apresentando também picos no começo de cada ano, indicando alguma sazonalidade.
+  
+## 4.2 Autocorrelação e Autocorrelação Parcial
+  
+ A função de autocorrelaçao mede o quanto a série esta relacionada com os seus valores passados, no nosso caso, quanto o nossa quantidade mensal de venda esta relacionadas os valores dos meses que já passaram. Na autocorrelação parcial, é medido a correlação entre duas observações seriais, ou seja, dois periodos diferentes.
+  
+ ![image](https://user-images.githubusercontent.com/90925360/188005017-0a9013c9-8d11-4b13-9ddc-7694e11fd2c8.png)
+ 
+  Como podemos observar, não temos nenhum lag importante que seja correlacionado com a nossa série.
+  
+ ## 4.3 Estacionariedade da Série
+  
+ Aqui vamos checar a estacionariedade da série. Para ser estacinária a série deve apresentar média,variância e a estrutura de autocorrelaçao se mantém constantes durante o tempo.
+  
+![image](https://user-images.githubusercontent.com/90925360/188008037-b278a5e9-9e6c-4de2-a1e4-ac400f40833d.png) 
+  
+ A imagem apresenta uma janela de tempo de 4 meses, para verificar o comportamento da média. Como podemos verificar a média apresenta dois picos ali, como já comentados em outras análises.
+
+  Para uma melhor entendimento se a série é estacinária, vamos realizar o teste estatístico de Dickey-Fuller. O teste nada mais que um teste de hipótese:
+  
+```
+  ADF_test(df_mensal['item_cnt_day'],'quantidade_produto')
+```
+  
+  ![image](https://user-images.githubusercontent.com/90925360/188009191-9b6a4da6-1a60-4fc2-9fc9-1f86f07448a3.png)
+
+O teste de dick fuller, nos mostrou que a série é estacionária com uma confiança de 90%,95% e 99%, mesmo mostrando aqueles picos vistos na sazonalidade e aquela pequena tendência de queda.
+  
+## 4.3.1 Fazendo a diferenciação (DIFF)
+  
+ O método diff nada mais é que tentar tirar a sazonalidade da série, para o modelo de série temporal ter uma melhor captura do comportamento da série analisada aqui. Nesse caso, vamo tirar a diferença de 1 mês.
+ 
+  ```
+def get_diff(data):
+    data['item_cnt_day_diff'] = data.item_cnt_day.diff()    
+    data = data.dropna()      
+    return data
+stationary_df = get_diff(df_mensal)
+```
+ 
+![image](https://user-images.githubusercontent.com/90925360/188009969-e5d7a2bc-7bbc-4a0d-aa7d-27de29fd72e5.png)
+
+ Vamos, analisar novamente a média movel e a estacionariedade da série, mas agora com a diferenciaçao.
+  
+![image](https://user-images.githubusercontent.com/90925360/188010082-e4a0853f-1dd5-44a6-8d65-62db0ee391a9.png)
+
+![image](https://user-images.githubusercontent.com/90925360/188010453-19f564a0-f5c7-4cdb-bc25-2b0acef43183.png)
+  
+A nossa série continua sendo estacionária, mas veja que conseguimos deixar a média (Figura acima) um pouco melhor para o modelo. Por isso, a modelagem vai ser feita na variavel com diferenciação.
+
+## 5. Engenharia de Features 
+  
+Vamos criar algumas features para tentar melhorar a previsão do modelo.
+  
+```
+stationary_df['mes'] = [i.month for i in stationary_df.index] #add uma coluna de mês
+stationary_df['ano'] = [i.year for i in stationary_df.index] #add uma couna de ano
+
+```
+Com isso, temos o nosso dateset que irá seguir para o modelo.
+
+  ![image](https://user-images.githubusercontent.com/90925360/188011292-48f3a32c-9a7f-468f-a857-964db241338c.png)
+
+## 6. Separação da Base de Treino e Teste
+
+Vamos retirar da base variaveis que não faz sentido para o modelo, com o numero da loja, o numero do produto, o valor do produto, porque são variaveis que possue o mesmo valor ao longo de todo o dataset e também a variavel <date_block_num> já que temos uma coluna de mês.
+  
+```
+x=stationary_df.drop(columns =['item_cnt_day', 'sales_month', 'shop_id', 'item_id', 'date_block_num', 'item_price', 'item_cnt_day_diff'])
+y=stationary_df.item_cnt_day_diff
+x = sm.add_constant(x) #addicionando uma constante base da variavel regressoras ou exogenas.
+```
+
+Com isso, as variaveis regressoras ou exogenas ficarm assim:
+ 
+![image](https://user-images.githubusercontent.com/90925360/188012434-5b39c2cb-64e2-4dd4-80b9-6dab7be58577.png)
+
+ Agora, vamos dividir o y e o x na nossa base de treino e teste. Como estamos falando de série temporal o tempo deve ser respeitado, então, separei a minha base de treino num periodo que vai 2013-01-31 a 2015-07-31 e base de teste os ultimos 5 meses.
+  
+```
+x_train, x_test, y_train, y_test = train_test_split(x,y, '2013-01-31','2015-07-31', '2015-08-31') 
+``` 
+![image](https://user-images.githubusercontent.com/90925360/188013043-75dc193a-0c4e-4f0b-9168-24f6e489d59d.png)
+
+## 7. Escalonando as variaveis
+ 
+ # Normalização das variáveis
+  
+```
+scaler = MinMaxScaler()
+scaler.fit(x_train)
+
+X_train_scaled = scaler.transform(x_train)
+X_test_scaled = scaler.transform(x_test)
+X_escalo = scaler.transform(x)
+# Transformand para dataframe para visualização
+x_train = pd.DataFrame(X_train_scaled,columns = x_train.columns, index =x_train.index )
+x_test = pd.DataFrame(X_test_scaled,columns = x_train.columns, index = x_test.index)
+x = pd.DataFrame(X_escalo,columns = x.columns, index = x.index)
+```
+  
