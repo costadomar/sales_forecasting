@@ -1,4 +1,4 @@
-# Previsão da Quantidade de Vendas com Série Temporais
+# Previsão da Quantidade de Vendas com Séries Temporais
 
 ![log_series_temporais](https://user-images.githubusercontent.com/90925360/187972304-0853346c-51e6-4ee6-841e-5940f2d9f091.JPG)
   
