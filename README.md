@@ -243,7 +243,7 @@ Com isso, temos o nosso dateset que irá seguir para o modelo.
 
 ## 6. Separação da Base de Treino e Teste
 
-Vamos retirar da base variaveis que não faz sentido para o modelo, com o numero da loja, o numero do produto, o valor do produto, porque são variaveis que possue o mesmo valor ao longo de todo o dataset e também a variavel <date_block_num> já que temos uma coluna de mês.
+Vamos retirar da base variaveis que não faz sentido para o modelo, com o numero da loja, o numero do produto, o valor do produto, porque são variáveis que possuem o mesmo valor ao longo de todo o dataset, como também a variável <date_block_num> já que temos uma coluna de mês.
   
 ```
 x=stationary_df.drop(columns =['item_cnt_day', 'sales_month', 'shop_id', 'item_id', 'date_block_num', 'item_price', 'item_cnt_day_diff'])
@@ -255,7 +255,7 @@ Com isso, as variaveis regressoras ou exogenas ficarm assim:
  
 ![image](https://user-images.githubusercontent.com/90925360/188012434-5b39c2cb-64e2-4dd4-80b9-6dab7be58577.png)
 
- Agora, vamos dividir o y e o x na nossa base de treino e teste. Como estamos falando de série temporal o tempo deve ser respeitado, então, separei a minha base de treino num periodo que vai 2013-01-31 a 2015-07-31 e base de teste os ultimos 5 meses.
+ Agora, vamos dividir o y e o x na nossa base de treino e teste. Como estamos falando de série temporal o tempo deve ser respeitado, então, separei a minha base de treino num periodo que vai 2013-01-31 a 2015-07-31 e base de teste os últimos 5 meses.
   
 ```
 x_train, x_test, y_train, y_test = train_test_split(x,y, '2013-01-31','2015-07-31', '2015-08-31') 
@@ -291,14 +291,15 @@ Para analisarmos mais profundamente os dados que nos foi fornecido, utilizamos o
 
 Esses são os valores dos parâmetros que minimizam melhor o AIC.
 
-Com isso, vamos treinar o modelo a partir desses parametros, fazendo uma previsão de 5 meses a frente da nossa base de treino.
+Com isso, vamos treinar o modelo a partir desses parâmetros, fazendo uma previsão de 5 meses a frente da nossa base de treino.
 
 ![image](https://user-images.githubusercontent.com/90925360/188016237-4258ccf8-643d-476b-b464-34d1f153bb61.png)
 
 ![image](https://user-images.githubusercontent.com/90925360/188016301-0a74dac2-ea36-480b-a4fd-e88978ce1c01.png)
 
-Podemos vê a previsão do modelo (verde) em relação aos dados de testes. A predição até consegue fazer a tendência nos 2 primeiros eses do dados de teste, mas logo em seguida ela começa a subir.
-Vamos analisar os residuos gerados pelo modelo.
+Podemos vê a previsão do modelo (verde) em relação aos dados de testes. A predição até consegue fazer a tendência nos 2 primeiros meses do dados de teste, mas logo em seguida ela começa a subir.
+  
+Vamos analisar os resíduos gerados pelo modelo.
 
 ```
   stepwise.plot_diagnostics(figsize=(16, 8))
@@ -306,11 +307,11 @@ Vamos analisar os residuos gerados pelo modelo.
 ```
 ![image](https://user-images.githubusercontent.com/90925360/188018189-e4185ac8-6cab-447f-a96d-c2312020a213.png)
 
-Na figura acima, temos o resíduo, histograma dos resíduos o gráfico QQ e o correlograma.
+Na figura acima, temos o resíduo, histograma dos resíduos, o gráfico QQ e o correlograma.
 
-O comportamento dos resíduos apresentam uma grande flutuação em torno do valor zero. Já o histograma não chegou a apresentar uma distribuição normal. No gráfico, do Q Q plot temos uma grande dispersão dos valões no começo da linha vermelha e no final dela, o que evidencia uma não normalidade dos dados, e por fim, o correlograma que não traz muitas informações.
+O comportamento dos resíduos apresentam uma grande flutuação em torno do valor zero. Já o histograma não chegou a apresentar uma distribuição normal. No gráfico, do Q-Q plot temos uma grande dispersão dos valões no começo da linha vermelha e no final dela, o que evidencia uma não normalidade dos dados, e por fim, o correlograma que não traz muitas informações.
 
-Agora vamos analisar as métricas do nosso modelo. Para fazer a avaliação do modelo esta sendo utilizado 2 métricas.
+Agora vamos analisar as métricas do nosso modelo. 
 
 As métricas para a avaliação do modelo é o RMSE, MAE da biblioteca SKLEARN, sendo muito usadas em séries temporais A primeira métrica é a Raiz Quadrada do Erro Quadrático Médio, sendo a diferença do valor real e o valor previsto, é usada para comparação entre modelos, onde o melhor modelo apresenta o valor mais próximo de zero, sendo mais sensível a erros maiores O MAE, erro médio absoluto, sendo a média dos erros absolutos da série, na qual é a diferença do real com o previsto.
 
@@ -331,23 +332,23 @@ Para seguir a modelagem com o SARIMAX, utilizaremos os coeficientes dados pelo A
 
 Quanto mais próximo o grau de conformidade e previsão as linhas devem ficar alinhadas sem recuos. Como podemos ver acima, o modelo apresentado conseguiu capturar um pouco o padrão das bases de dados de treino.
  
- Agora, vamos analisar a perfomance na base com a base de teste.
+ Agora, vamos analisar a perfomance na série com a base de teste.
   
  ![image](https://user-images.githubusercontent.com/90925360/188028199-58186f94-2f41-4a83-9cfc-f3b08cfcc3f2.png)
 
-Aqui, temos a Previsão do Sarimax em relação a nossa base de dados. Vemos que o modelo conseguiu acompanhar a tendencia dos dados ao longo da série.
+Aqui, temos a Previsão do Sarimax em relação a nossa base de dados. Vemos que o modelo conseguiu acompanhar a tendência dos dados ao longo da série.
 
-Vamos analisar os residuos e as métricas para vê o desempenho do modelo.
+Vamos analisar os resíduos e as métricas para vê o desempenho do modelo.
 
  ![image](https://user-images.githubusercontent.com/90925360/188028327-1a469a7c-8e4e-48a3-9b20-de68a78bd27e.png)
 
  ![image](https://user-images.githubusercontent.com/90925360/188028441-9f8b5385-f908-4d46-b8c8-b38c32b3ecdc.png)
 
-Como podemos perceber o SARIMAX obteve uma melhora em relação ao modelo do ARIMA. A análise de residuos, ainda mostrou uma dispersão no começo e no final, mas a maioria dos valões permanceram em cima da minha vermelha, o histograma já apresentou uma melhor distribuição se aproximando da normal, como mostra a linha do KDE. Em relação, as métricas tivemos uma pequena diferença também de perfomance.
+Como podemos perceber o SARIMAX obteve uma melhora em relação ao modelo do ARIMA. A análise de resíduos, ainda mostrou uma dispersão no começo e no final, mas a maioria dos valões permanceram em cima da linha vermelha, o histograma já apresentou uma melhor distribuição se aproximando da normal, como mostra a linha do KDE. Em relação, as métricas tivemos uma pequena diferença também de perfomance.
 Por conta disso, vamos seguir a modelagem com o Sarimax.
 
-### 8.2.1 Agregando variaveis exogenas ao modelo
- Agora, vamos agregar as variaveis exogenas ao nosso modelo para vê se a perfomance dele melhora ou piora.
+### 8.2.1 Agregando Variaveis Exogenas ao Modelo
+ Agora, vamos agregar as variáveis exógenas ao nosso modelo para vê se a perfomance dele melhora ou piora.
   
  ```
 mod = SARIMAX(y_train,exog=x_train, order=(0,0,1), seasonal_order=(0, 0, 1, 12))
@@ -360,7 +361,7 @@ predito = fit_res.predict(typ='levels')
 
   ![image](https://user-images.githubusercontent.com/90925360/188032056-58fda351-6fb0-44b0-8087-5341a553becf.png)
 
-Aqui temos, na primeira figura o modelo só com a base de treino e na figura debaixo o modelo com toda a base de dados. Aparentemente, a perfomance foi parecida com o modelo sem as variaveis exogenas.
+Aqui temos, na primeira figura o modelo só com a base de treino e na figura debaixo o modelo com toda a base de dados. Aparentemente, a perfomance foi parecida com o modelo sem as variáveis exógenas.
   
 Seguimos com a análise dos residuos e das métricas.
  
@@ -368,10 +369,10 @@ Seguimos com a análise dos residuos e das métricas.
   
  ![image](https://user-images.githubusercontent.com/90925360/188032432-fd5bbd5c-af06-48f0-9ae7-6636f9dc6389.png)
   
-Podemos verificar pela análise de residuos, que obteve uma perfomance parecida, mas vale destacar Q-Q plot apresenta mais valões em cima da linha vermelha, principalmente no inicio da série, na qual podemos verificar que o modelo conseguiu capturar melhor o padrão da série quando comparados ao modelo sem variaveis exogenas e o arima. Na qual, comprova-se com os valores ds métricas que obtiveram um melhor resultado, tanto mean absolut error, quanto o rmse.
+Podemos verificar pela análise de residuos, que obteve uma perfomance parecida, mas vale destacar Q-Q plot apresenta mais valões em cima da linha vermelha, principalmente no inicio da série, na qual podemos verificar que o modelo conseguiu capturar melhor o padrão da série quando comparados ao modelo sem variaveis exogenas e o arima. Na qual, comprova-se com os valores das métricas que obtiveram um melhor resultado, tanto mean absolute error, quanto o rmse.
 
-### 8.2.2 Usando o cros validation
-Para entendermos melhor o comportamento do modelo ao longo da série temporal aqui estudada, vamos utilizar um cross validation, respeitando o conceito de série temporais. A base de treino ira iniciar com 5 meses e conforme o passar da função 1 mês vai ser adicionado a base de treino, já a de teste sempre será 5 meses a frente da base de treino.
+### 8.2.2 Usando o Cross-Validation
+Para entendermos melhor o comportamento do modelo ao longo da série temporal aqui estudada, vamos utilizar um cross-validation, respeitando o conceito de séries temporais. A base de treino ira iniciar com 5 meses e conforme o passar da função 1 mês vai ser adicionado a base de treino, já a de teste sempre será 5 meses a frente da base de treino.
 
  ```
 rmse_treino =[]
@@ -430,7 +431,7 @@ O resultados das métricas ao longo da série:
 
  ![image](https://user-images.githubusercontent.com/90925360/188034621-fceb7e0f-8697-41a5-a0b3-7476f059444d.png)
 
- Temos o comportamento das métricas ao longo do tempo. As duas métricas tem um pico de erro, no começo de 2014 e logo em seguida no começo de 2015, se formos analisar pelo comportamento da nossa série, ela apresenta pico nos começo desses anos, então se torna aceitavel que o modelo erre quando ele tenta fazer previsões nessas datas. Mas, tanto no RMSE quanto MAE n base de teste, temos um tendencia de queda ao longo da série.
+Temos o comportamento das métricas ao longo do tempo. As duas métricas tem um pico de erro, no começo de 2014 e logo em seguida no começo de 2015, se formos analisar pelo comportamento da nossa série, ela apresenta pico nos começo desses anos, então se torna aceitavel que o modelo erre quando ele tenta fazer previsões nessas datas. Mas, tanto no RMSE quanto MAE na base de teste, temos um tendência de queda ao longo da série.
 
 A média do MAE pelo modelo foi de 19.93 e a do RMSE de 24.
   
@@ -438,7 +439,7 @@ Com isso, vamos partir para o forecast com o esse modelo treinado.
 
 ## 9. Forecasting da Quantidade de Vendas
 
-O grafico e a tabela abaixo apresentam a previsão futura de 5 meses a frente, como o modelo SARIMAX  com a inclusção das variaveis exogenas.
+O gráfico e a tabela abaixo apresentam a previsão futura de 5 meses a frente, como o modelo SARIMAX  com a inclusão das variáveis exógenas.
   
 ![image](https://user-images.githubusercontent.com/90925360/188037580-6dcdf8c8-5f4d-4eb8-b41f-5dd5d51fbb0a.png)
 
