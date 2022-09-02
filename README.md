@@ -163,26 +163,14 @@ Vamos fazer uma análise de correlação da variavel target em função do tempo
 
 # 4. Análise Da Série Temporal 'item_cnt_day'
   
-A partir daqui vamos analisar o comportamento da nossa variavel target, mediante conceitos de séries temporais. Como queremos prever o próximo mês de venda, vamos trabalahr com o dataset organizado mensalmente.
-  
+A partir daqui vamos analisar o comportamento da nossa variavel target, mediante conceitos de séries temporais. Como queremos prever o próximo mês de venda, vamos trabalhar com o dataset organizado mensalmente.
 
-## 4.1 Decomposição dos dados
-
-Vamos decompor os dados em tendencia, sazonalidade e residuos, porque toda série temporal pode ser decomposta nessas três partes.
-  
-```
+ ```
 df_mensal = df_shop31_Item_20949.copy() #fazendo uma cópia do dataset
 df_mensal.set_index('date', inplace = True) #transformando a coluna data em index
 df_mensal = df_mensal.resample(rule = 'M').last() #reordenando o dataset por mês
 ```
-![image](https://user-images.githubusercontent.com/90925360/188002655-3134e05e-9444-4b89-bf3c-76a599d69de7.png)
-
- A série não apresentou uma correlaço muito boa com o tempo.
-  
- # 4. Análise Da Série Temporal 'item_cnt_day'
-  
- A partir daqui vamos analisar o comportamento da nossa variavel target, mediante conceitos de séries temporais.
-  
+ 
 ## 4.1 Decomposição dos dados
  As séries temporais apresentam algumas propriedades importantes para serem analisas:
   * Tendência: É a análise se a série esta crescendo, dimuindo ou estável com o decorrer do tempo.
@@ -341,6 +329,132 @@ Para seguir a modelagem com o SARIMAX, utilizaremos os coeficientes dados pelo A
 ```
 ![image](https://user-images.githubusercontent.com/90925360/188023000-22ea990c-d400-46f7-957b-e191ee1c8ab3.png)
 
-Quanto mais próximo o grau de conformidade e previsão as linhas devem ficar alinhadas sem recuos. Como podemos ver acima, o modelo apresentado s conseguiram capturar
-o padrão das bases de dados
+Quanto mais próximo o grau de conformidade e previsão as linhas devem ficar alinhadas sem recuos. Como podemos ver acima, o modelo apresentado conseguiu capturar um pouco o padrão das bases de dados de treino.
+ 
+ Agora, vamos analisar a perfomance na base com a base de teste.
+  
+ ![image](https://user-images.githubusercontent.com/90925360/188028199-58186f94-2f41-4a83-9cfc-f3b08cfcc3f2.png)
 
+Aqui, temos a Previsão do Sarimax em relação a nossa base de dados. Vemos que o modelo conseguiu acompanhar a tendencia dos dados ao longo da série.
+
+Vamos analisar os residuos e as métricas para vê o desempenho do modelo.
+
+ ![image](https://user-images.githubusercontent.com/90925360/188028327-1a469a7c-8e4e-48a3-9b20-de68a78bd27e.png)
+
+ ![image](https://user-images.githubusercontent.com/90925360/188028441-9f8b5385-f908-4d46-b8c8-b38c32b3ecdc.png)
+
+Como podemos perceber o SARIMAX obteve uma melhora em relação ao modelo do ARIMA. A análise de residuos, ainda mostrou uma dispersão no começo e no final, mas a maioria dos valões permanceram em cima da minha vermelha, o histograma já apresentou uma melhor distribuição se aproximando da normal, como mostra a linha do KDE. Em relação, as métricas tivemos uma pequena diferença também de perfomance.
+Por conta disso, vamos seguir a modelagem com o Sarimax.
+
+## 8.2.1 Agregando variaveis exogenas ao modelo
+ Agora, vamos agregar as variaveis exogenas ao nosso modelo para vê se a perfomance dele melhora ou piora.
+  
+ ```
+mod = SARIMAX(y_train,exog=x_train, order=(0,0,1), seasonal_order=(0, 0, 1, 12))
+fit_res = mod.fit(disp=False, maxiter=250)
+print(fit_res.summary())
+
+predito = fit_res.predict(typ='levels')
+  ```
+  ![image](https://user-images.githubusercontent.com/90925360/188030472-f6d6a64a-956b-4632-a2e8-5256314833f2.png)
+
+  ![image](https://user-images.githubusercontent.com/90925360/188032056-58fda351-6fb0-44b0-8087-5341a553becf.png)
+
+Aqui temos, na primeira figura o modelo só com a base de treino e na figura debaixo o modelo com toda a base de dados. Aparentemente, a perfomance foi parecida com o modelo sem as variaveis exogenas.
+  
+Seguimos com a análise dos residuos e das métricas.
+ 
+ ![image](https://user-images.githubusercontent.com/90925360/188032363-6cbea940-9860-4dd1-bfc3-933d6ff017d6.png)
+  
+ ![image](https://user-images.githubusercontent.com/90925360/188032432-fd5bbd5c-af06-48f0-9ae7-6636f9dc6389.png)
+  
+Podemos verificar pela análise de residuos, que obteve uma perfomance parecida, mas vale destacar Q-Q plot apresenta mais valões em cima da linha vermelha, principalmente no inicio da série, na qual podemos verificar que o modelo conseguiu capturar melhor o padrão da série quando comparados ao modelo sem variaveis exogenas e o arima. Na qual, comprova-se com os valores ds métricas que obtiveram um melhor resultado, tanto mean absolut error, quanto o rmse.
+
+### 8.2.2 Usando o cros validation
+Para entendermos melhor o comportamento do modelo ao longo da série temporal aqui estudada, vamos utilizar um cross validation, respeitando o conceito de série temporais. A base de treino ira iniciar com 5 meses e conforme o passar da função 1 mês vai ser adicionado a base de treino, já a de teste sempre será 5 meses a frente da base de treino.
+
+ ```
+rmse_treino =[]
+rmse_teste = []
+
+mae_treino =[]
+mae_test = []
+cont = 0
+for i in range(5, df_mensal.shape[0] - 4):
+  cont += 1
+  x_train =x.iloc[:i]
+  x_test = x.iloc[x_train.shape[0]:x_train.shape[0]+5]
+  y_train =y.iloc[:i]
+  y_test = y.iloc[x_train.shape[0]:x_train.shape[0]+5]
+  x_t = x.iloc[:x_train.shape[0]+5]
+  y_t= y.iloc[:x_train.shape[0]+5]
+    
+
+  modelo3 = SARIMAX(y_train, exog = x_train, order=(3,0,0), seasonal_order=(1, 0, [1, 2], 12), enforce_stationarity=False)
+  
+  fit_res = modelo3.fit(disp=False, maxiter=250)
+  predito = fit_res.predict(typ='levels')
+  rmse_treino.append(np.sqrt(mean_squared_error(y_train, predito)))
+  mae_treino.append(mean_absolute_error(y_train, predito))
+
+  modelo3 = SARIMAX(y_t, exog = x_t, order=(3,0,0), seasonal_order=(1, 0, [1, 2], 12),enforce_stationarity=False )
+
+  res1 = modelo3.filter(fit_res.params)
+
+  predict = res1.get_prediction()
+  predict_ci = predict.conf_int()
+
+  
+  # Predições dinâmicas
+  predict_dy = res1.get_prediction(dynamic= y_test.index[0])
+  predict_dy_ci = predict_dy.conf_int()
+  rmse_teste.append(np.sqrt(mean_squared_error(y_test, predict_dy.predicted_mean.loc[y_test.index[0]:])))
+  mae_test.append(mean_absolute_error(y_test, predict_dy.predicted_mean.loc[y_test.index[0]:]))
+
+  print(f"RMSE {cont}: { mean_squared_error(y_train, predito, squared= False):.2f}")
+  print(f"MAE {cont}: {mean_absolute_error(y_train, predito)}")
+
+print()
+med_erro = np.mean(mae_test)  
+print(f"RMSE_média_treino: {np.mean(rmse_treino):.2f}")
+print(f"MAE_med_treino: {np.mean(mae_treino):.2f}")
+print(f"RMSE_média_test: {np.mean(rmse_teste):.2f}")
+print(f"MAE_med_test: {np.mean(mae_test):.2f}")
+ ```
+  
+O resultados das métricas ao longo da série:
+  
+![image](https://user-images.githubusercontent.com/90925360/188034529-e60c03b1-d9ba-438d-a637-2412b7b70203.png)
+  
+![image](https://user-images.githubusercontent.com/90925360/188035152-5790aa5b-2f9d-4bb8-ac76-a2085df9b089.png)
+
+ ![image](https://user-images.githubusercontent.com/90925360/188034621-fceb7e0f-8697-41a5-a0b3-7476f059444d.png)
+
+ Temos o comportamento das métricas ao longo do tempo. As duas métricas tem um pico de erro, no começo de 2014 e logo em seguida no começo de 2015, se formos analisar pelo comportamento da nossa série, ela apresenta pico nos começo desses anos, então se torna aceitavel que o modelo erre quando ele tenta fazer previsões nessas datas. Mas, tanto no RMSE quanto MAE n base de teste, temos um tendencia de queda ao longo da série.
+
+A média do MAE pelo modelo foi de 19.93 e a do RMSE de 24.
+  
+Com isso, vamos partir para o forecast com o esse modelo treinado.
+
+## 9. Forecasting da Quantidade de Vendas
+
+O grafico e a tabela abaixo apresentam a previsão futura de 5 meses a frente, como o modelo SARIMAX  com a inclusção das variaveis exogenas.
+  
+![image](https://user-images.githubusercontent.com/90925360/188037580-6dcdf8c8-5f4d-4eb8-b41f-5dd5d51fbb0a.png)
+
+Apresenta a média das previsões, juntamente com o intervalo de confiança de 95%.
+  
+Para um melhor diagnóstico para o negócio, apresento também uma tabela com o melhor e o pior cenário de vendas, em relação ao erro médio do modelo (MAE):
+
+```
+pred_media = pred_uc.predicted_mean.reset_index()
+pred_media.columns = ['data_previsão','Media_predicao']
+pred_media['Pior_Cenário'] = pred_media['Media_predicao'].map(lambda x: x - med_erro)
+pred_media['Melhor_Cenário'] = pred_media['Media_predicao'].map(lambda x: x + med_erro)
+```
+
+![image](https://user-images.githubusercontent.com/90925360/188038357-b9d9d4bb-d012-4b65-9d61-7dbbbe0cac26.png)
+
+## 10 Considerações Finais
+
+O modelo ainda pode ser melhorado, com a adição de algumas features para uma melhor perfomance.
