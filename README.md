@@ -456,6 +456,6 @@ pred_media['Melhor_Cenário'] = pred_media['Media_predicao'].map(lambda x: x + m
 
 ![image](https://user-images.githubusercontent.com/90925360/188038357-b9d9d4bb-d012-4b65-9d61-7dbbbe0cac26.png)
 
-## 10 Considerações Finais
+## 10. Considerações Finais
 
 O modelo ainda pode ser melhorado, com a adição de algumas features para uma melhor perfomance.
