@@ -24,7 +24,7 @@ de varejo. O modelo deve prever as vendas para um só produto de apenas uma loja
 alvo no próximo mês.
 
 ## Abordagem do Problema
-A abordagem utilizada aqui vai ser de Séries Temporais, devido um dos objetivos de uma série temporal ser é a compreensão dessa serie ao londo do tempo, sendo de suma importância, quando falamos, por exemplo, de uma análise de crescimento ou decrescimento de vendas que é o caso estudado aqui, para poder tomar a mehor decisão partindo desse tipo de análise. Com o estudo dela, podemos realizar a previsão futura da venda do próximo mês.
+A abordagem utilizada aqui vai ser de Séries Temporais, devido um dos objetivos de uma série temporal ser é a compreensão dessa serie ao londo do tempo, sendo de suma importância, quando falamos, por exemplo, de uma análise de crescimento ou decrescimento de vendas que é o caso estudado aqui, para poder tomar a mehor decisão partindo desse tipo de análise. Com o estudo dela, podemos realizar a previsão futura da venda do próximo mês. Com isso, os modelos que irão ser empregados aqui vai ser o ARIMA e o SARIMAX.
 ## Entendendo os dados:
 ### 1. Importando as Bibliotecas
 Fazendo o import das bibliotecas necessária
@@ -51,7 +51,7 @@ Para a análise aqui nesse projeto, só vamos utilizar o dataset < sales_train >
 
 ![image](https://user-images.githubusercontent.com/90925360/187980485-1e98ddf3-2e38-4e34-ae49-c8053eed37ad.png)
 
-### 2. Análise Descritiva dos Dados:
+## 2. Análise Descritiva dos Dados:
 
 ![image](https://user-images.githubusercontent.com/90925360/187981278-84ed7224-8c2a-4a39-988d-ebe18fd646ad.png)
 
@@ -65,7 +65,7 @@ Como estamos trabalhando com série temporal, temos que organizar de forma cresc
    ```
 df_sales_train  = df_sales_train.sort_values(by= 'date', axis=0, ascending=True).reset_index(drop=True)
 ```
-### 3. Análise Descritiva dos Dados:
+## 3. Análise Descritiva dos Dados:
   
   Aqui temos um overview da distribuição e do box-plot das variaveis do dateset.
   
@@ -161,7 +161,7 @@ Vamos fazer uma análise de correlação da variavel target em função do tempo
 
  A série não apresenta uma correlação alta com o tempo.
 
-# 4. Análise Da Série Temporal 'item_cnt_day'
+## 4. Análise Da Série Temporal 'item_cnt_day'
   
 A partir daqui vamos analisar o comportamento da nossa variavel target, mediante conceitos de séries temporais. Como queremos prever o próximo mês de venda, vamos trabalhar com o dataset organizado mensalmente.
 
@@ -171,7 +171,7 @@ df_mensal.set_index('date', inplace = True) #transformando a coluna data em inde
 df_mensal = df_mensal.resample(rule = 'M').last() #reordenando o dataset por mês
 ```
  
-## 4.1 Decomposição dos dados
+### 4.1 Decomposição dos dados
  As séries temporais apresentam algumas propriedades importantes para serem analisas:
   * Tendência: É a análise se a série esta crescendo, dimuindo ou estável com o decorrer do tempo.
   * Sazonalidade: Seria um feômeno periodo que se repetem no mesmo periodo no tempo, exemplo, vendas de chocolate em toda pascoa no mês de março pr exemplo.
@@ -180,7 +180,7 @@ df_mensal = df_mensal.resample(rule = 'M').last() #reordenando o dataset por mê
 
 Claramente a série apresenta uma tendência de baixa a partir de maio de 2014. Apresentando também picos no começo de cada ano, indicando alguma sazonalidade.
   
-## 4.2 Autocorrelação e Autocorrelação Parcial
+### 4.2 Autocorrelação e Autocorrelação Parcial
   
  A função de autocorrelaçao mede o quanto a série esta relacionada com os seus valores passados, no nosso caso, quanto o nossa quantidade mensal de venda esta relacionadas os valores dos meses que já passaram. Na autocorrelação parcial, é medido a correlação entre duas observações seriais, ou seja, dois periodos diferentes.
   
@@ -188,7 +188,7 @@ Claramente a série apresenta uma tendência de baixa a partir de maio de 2014. 
  
   Como podemos observar, não temos nenhum lag importante que seja correlacionado com a nossa série.
   
- ## 4.3 Estacionariedade da Série
+ ### 4.3 Estacionariedade da Série
   
  Aqui vamos checar a estacionariedade da série. Para ser estacinária a série deve apresentar média,variância e a estrutura de autocorrelaçao se mantém constantes durante o tempo.
   
@@ -206,7 +206,7 @@ Claramente a série apresenta uma tendência de baixa a partir de maio de 2014. 
 
 O teste de dick fuller, nos mostrou que a série é estacionária com uma confiança de 90%,95% e 99%, mesmo mostrando aqueles picos vistos na sazonalidade e aquela pequena tendência de queda.
   
-## 4.3.1 Fazendo a diferenciação (DIFF)
+### 4.3.1 Fazendo a diferenciação (DIFF)
   
  O método diff nada mais é que tentar tirar a sazonalidade da série, para o modelo de série temporal ter uma melhor captura do comportamento da série analisada aqui. Nesse caso, vamo tirar a diferença de 1 mês.
  
@@ -316,7 +316,7 @@ As métricas para a avaliação do modelo é o RMSE, MAE da biblioteca SKLEARN, 
 
 ![image](https://user-images.githubusercontent.com/90925360/188019943-dbe8d18d-ef0a-433f-84e1-7e559cc6fd60.png)
 
-## 8.2 Modelando com o Sarimax
+### 8.2 Modelando com o Sarimax
 
 Para seguir a modelagem com o SARIMAX, utilizaremos os coeficientes dados pelo AUTO-ARIMA, order (0,0,1) e seasonal_order (0,0,1,12). Primeiramente vamos fazer a modelagem só com a variavel target, sem as variaveis exogenas no modelo para analizarmos o comportamento do modelo.
 
@@ -346,7 +346,7 @@ Vamos analisar os residuos e as métricas para vê o desempenho do modelo.
 Como podemos perceber o SARIMAX obteve uma melhora em relação ao modelo do ARIMA. A análise de residuos, ainda mostrou uma dispersão no começo e no final, mas a maioria dos valões permanceram em cima da minha vermelha, o histograma já apresentou uma melhor distribuição se aproximando da normal, como mostra a linha do KDE. Em relação, as métricas tivemos uma pequena diferença também de perfomance.
 Por conta disso, vamos seguir a modelagem com o Sarimax.
 
-## 8.2.1 Agregando variaveis exogenas ao modelo
+### 8.2.1 Agregando variaveis exogenas ao modelo
  Agora, vamos agregar as variaveis exogenas ao nosso modelo para vê se a perfomance dele melhora ou piora.
   
  ```
