@@ -26,7 +26,7 @@ alvo no próximo mês.
 ## Abordagem do Problema
 A abordagem utilizada aqui vai ser de Séries Temporais, devido um dos objetivos de uma série temporal ser é a compreensão dessa serie ao londo do tempo, sendo de suma importância, quando falamos, por exemplo, de uma análise de crescimento ou decrescimento de vendas que é o caso estudado aqui, para poder tomar a mehor decisão partindo desse tipo de análise. Com o estudo dela, podemos realizar a previsão futura da venda do próximo mês. Com isso, os modelos que irão ser empregados aqui vai ser o ARIMA e o SARIMAX.
 ## Entendendo os dados:
-### 1. Importando as Bibliotecas
+## 1. Importando as Bibliotecas
 Fazendo o import das bibliotecas necessária
 ```
 import pandas as pd
