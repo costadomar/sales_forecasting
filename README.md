@@ -132,20 +132,20 @@ A Loja 31 é que apresenta a maior quantidade desse produto em vendas. Então, �
   
 ### 3.3 Visualização da loja 31 pelo produto 20949
   
-Agora já escolhemos qual o produto e loja que vamos utilizar para análise. Com isso, vamos fazer mais algumas visualização dos dados, para um melhor entedimento da base final.
+Agora já escolhemos qual o produto e loja que vamos utilizar para análise. Com isso, vamos fazer mais algumas visualização dos dados, para um melhor entendimento da base final.
  
 ```
 df_shop31_Item_20949= Item_20949[Item_20949['shop_id'] == 31].reset_index(drop = True)
 ```
 ### 3.2.1 Análise Descritiva dos Dados
 
-A variavel alvo a ser estudada aqui na análise é <item_cnt_day>, na nos mostra a quantidade de vendas dos produtos, por isso vamos plotar os gráficos agora em função dela.
+A variavel alvo a ser estudada aqui na análise é <item_cnt_day>, na qual nos mostra a quantidade de vendas dos produtos, por isso vamos plotar os gráficos agora em função dela.
   
 ![image](https://user-images.githubusercontent.com/90925360/187989177-63d9953f-e578-4905-88b1-e99f4af5c05d.png)
   
 ![image](https://user-images.githubusercontent.com/90925360/187989529-0931e69a-44ec-4ade-8733-20f21f9480f2.png)
   
-Como podemos observar no histograma que apreesenta um distribuição assimétrica a direita, com alguns outliers de quantidades de vendas a partir de 60 em concordância com o gráfico de box-plot abaixo que nos mostra que 50% da quantidade dos produtos está um pouco acima de 20.
+Como podemos observar no histograma, ele apresenta um distribuição assimétrica a direita, com alguns outliers de quantidades de vendas a partir de 60 em concordância com o gráfico de box-plot abaixo que nos mostra que 50% da quantidade dos produtos está um pouco acima de 20.
  
 ![image](https://user-images.githubusercontent.com/90925360/187989954-af855620-87b1-4ea8-a297-32062e6687a9.png)
   
@@ -155,7 +155,7 @@ Os gráficos acima, apresentam uma a série temporal da nossa variavel target po
   
 ### 3.2.1 Análise de Correlação
   
-Vamos fazer uma análise de correlação da variavel target em função do tempo para analisar o comportamento.
+Vamos fazer uma análise de correlação da variável target em função do tempo para analisar o comportamento.
 
 ![image](https://user-images.githubusercontent.com/90925360/187990633-4d554454-f151-4381-9ac5-fa4184c6d4a0.png)
 
@@ -163,7 +163,7 @@ Vamos fazer uma análise de correlação da variavel target em função do tempo
 
 ## 4. Análise Da Série Temporal 'item_cnt_day'
   
-A partir daqui vamos analisar o comportamento da nossa variavel target, mediante conceitos de séries temporais. Como queremos prever o próximo mês de venda, vamos trabalhar com o dataset organizado mensalmente.
+A partir daqui vamos analisar o comportamento da nossa variável target, mediante conceitos de séries temporais. Como queremos prever o próximo mês de venda, vamos trabalhar com o dataset organizado mensalmente.
 
  ```
 df_mensal = df_shop31_Item_20949.copy() #fazendo uma cópia do dataset
@@ -190,13 +190,13 @@ Claramente a série apresenta uma tendência de baixa a partir de maio de 2014. 
   
  ### 4.3 Estacionariedade da Série
   
- Aqui vamos checar a estacionariedade da série. Para ser estacinária a série deve apresentar média,variância e a estrutura de autocorrelaçao se mantém constantes durante o tempo.
+ Aqui vamos checar a estacionariedade da série. Para ser estacionária a série deve apresentar média,variância e a estrutura de autocorrelaçao se mantém constantes durante o tempo.
   
 ![image](https://user-images.githubusercontent.com/90925360/188008037-b278a5e9-9e6c-4de2-a1e4-ac400f40833d.png) 
   
  A imagem apresenta uma janela de tempo de 4 meses, para verificar o comportamento da média. Como podemos verificar a média apresenta dois picos ali, como já comentados em outras análises.
 
-  Para uma melhor entendimento se a série é estacinária, vamos realizar o teste estatístico de Dickey-Fuller. O teste nada mais que um teste de hipótese:
+  Para uma melhor entendimento se a série é estacionária, vamos realizar o teste estatístico de Dickey-Fuller. O teste nada mais é que um teste de hipótese:
   
 ```
   ADF_test(df_mensal['item_cnt_day'],'quantidade_produto')
@@ -208,7 +208,7 @@ O teste de dick fuller, nos mostrou que a série é estacionária com uma confia
   
 ### 4.3.1 Fazendo a diferenciação (DIFF)
   
- O método diff nada mais é que tentar tirar a sazonalidade da série, para o modelo de série temporal ter uma melhor captura do comportamento da série analisada aqui. Nesse caso, vamo tirar a diferença de 1 mês.
+ O método diff tem como finalidade tirar a sazonalidade da série, para o modelo de série temporal ter uma melhor captura do comportamento da série analisada aqui. Nesse caso, vamo tirar a diferença de 1 mês.
  
   ```
 def get_diff(data):
@@ -226,7 +226,7 @@ stationary_df = get_diff(df_mensal)
 
 ![image](https://user-images.githubusercontent.com/90925360/188010453-19f564a0-f5c7-4cdb-bc25-2b0acef43183.png)
   
-A nossa série continua sendo estacionária, mas veja que conseguimos deixar a média (Figura acima) um pouco melhor para o modelo. Por isso, a modelagem vai ser feita na variavel com diferenciação.
+A nossa série continua sendo estacionária, mas veja que conseguimos deixar a média (Figura acima) um pouco melhor para o modelo. Por isso, a modelagem vai ser feita na variável com diferenciação.
 
 ## 5. Engenharia de Features 
   
@@ -243,7 +243,7 @@ Com isso, temos o nosso dateset que irá seguir para o modelo.
 
 ## 6. Separação da Base de Treino e Teste
 
-Vamos retirar da base variaveis que não faz sentido para o modelo, com o numero da loja, o numero do produto, o valor do produto, porque são variáveis que possuem o mesmo valor ao longo de todo o dataset, como também a variável <date_block_num> já que temos uma coluna de mês.
+Vamos retirar da base variáveis que não faz sentido para o modelo, como: o número da loja, o número do produto, o valor do produto, devido ser variáveis que possuem o mesmo valor ao longo de todo o dataset, como também a variável <date_block_num> já que temos uma coluna de mês.
   
 ```
 x=stationary_df.drop(columns =['item_cnt_day', 'sales_month', 'shop_id', 'item_id', 'date_block_num', 'item_price', 'item_cnt_day_diff'])
@@ -251,18 +251,18 @@ y=stationary_df.item_cnt_day_diff
 x = sm.add_constant(x) #addicionando uma constante base da variavel regressoras ou exogenas.
 ```
 
-Com isso, as variaveis regressoras ou exogenas ficarm assim:
+Com isso, as variáveis regressoras ou exógenas ficaram assim:
  
 ![image](https://user-images.githubusercontent.com/90925360/188012434-5b39c2cb-64e2-4dd4-80b9-6dab7be58577.png)
 
- Agora, vamos dividir o y e o x na nossa base de treino e teste. Como estamos falando de série temporal o tempo deve ser respeitado, então, separei a minha base de treino num periodo que vai 2013-01-31 a 2015-07-31 e base de teste os últimos 5 meses.
+ Agora, vamos dividir o y e o x na nossa base de treino e teste. Como estamos falando de série temporal o tempo deve ser respeitado, então, separei a minha base de treino num período que vai 2013-01-31 a 2015-07-31 e base de teste os últimos 5 meses.
   
 ```
 x_train, x_test, y_train, y_test = train_test_split(x,y, '2013-01-31','2015-07-31', '2015-08-31') 
 ``` 
 ![image](https://user-images.githubusercontent.com/90925360/188013043-75dc193a-0c4e-4f0b-9168-24f6e489d59d.png)
 
-## 7. Escalonando as variaveis
+## 7. Escalonando as variáveis
   
 ```
 scaler = MinMaxScaler()
@@ -313,7 +313,7 @@ O comportamento dos resíduos apresentam uma grande flutuação em torno do valo
 
 Agora vamos analisar as métricas do nosso modelo. 
 
-As métricas para a avaliação do modelo é o RMSE, MAE da biblioteca SKLEARN, sendo muito usadas em séries temporais A primeira métrica é a Raiz Quadrada do Erro Quadrático Médio, sendo a diferença do valor real e o valor previsto, é usada para comparação entre modelos, onde o melhor modelo apresenta o valor mais próximo de zero, sendo mais sensível a erros maiores O MAE, erro médio absoluto, sendo a média dos erros absolutos da série, na qual é a diferença do real com o previsto.
+As métricas para a avaliação do modelo é o RMSE, MAE da biblioteca SCIKIT-LEARN, sendo muito usadas em séries temporais A primeira métrica é a Raiz Quadrada do Erro Quadrático Médio, sendo a diferença do valor real e o valor previsto, é usada para comparação entre modelos, onde o melhor modelo apresenta o valor mais próximo de zero, sendo mais sensível a erros maiores O MAE, erro médio absoluto, sendo a média dos erros absolutos da série, na qual é a diferença do real com o previsto.
 
 ![image](https://user-images.githubusercontent.com/90925360/188019943-dbe8d18d-ef0a-433f-84e1-7e559cc6fd60.png)
 
