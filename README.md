@@ -3,7 +3,7 @@
 ![log_series_temporais](https://user-images.githubusercontent.com/90925360/187972304-0853346c-51e6-4ee6-841e-5940f2d9f091.JPG)
   
 ## Descrição da Base de Dados:
-É composta por dados históricos diários de vendas, esta disponivel aqui: <https://www.kaggle.com/competitions/competitive-data-science-predict-future-sales/data> 
+É composta por dados históricos diários de vendas, está disponivel aqui: <https://www.kaggle.com/competitions/competitive-data-science-predict-future-sales/data> 
 ### Descrição das variaveis:
 * ID  - um ID que representa uma tupla (Loja, Item) dentro do conjunto de teste
 * shop_id - identificador exclusivo de uma loja
